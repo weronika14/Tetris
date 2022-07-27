@@ -2,7 +2,7 @@ import pygame
 import random
 import math
 
- 
+
 '''pretty much everything is done the rotion is all done and the scoring system works
 the game ends if the most recent shape that fell touches or goes over the red line
 there is an end screen
@@ -46,9 +46,7 @@ class Block:
 
     def __init__(self):
 
-        number = random.randint(0,6)
-        #number = 6
-        #random.choice polecam
+        number = random.randint(0,6)#picks a random block
 
         if number == 0:
             self.shape = YellowSquare()
@@ -75,9 +73,9 @@ class Block:
         for i in range(0,4):
             pygame.draw.rect(screen, self.colour, currentRect[i])
             pygame.draw.rect(screen, white, currentRect[i],1)
-        pygame.draw.circle(screen, (255,255,255), self.shape.centre, 5)
+        #pygame.draw.circle(screen, (255,255,255), self.shape.centre, 5)
 
-    def rotate(self):
+    def rotate(self): #rotates anticlockwise.
         for i in range(0,4):
             xDistance = currentBlock.shape.currentSquares[i].x - (currentBlock.shape.xCoordinate)
             yDistance = currentBlock.shape.currentSquares[i].y - (currentBlock.shape.yCoordinate)
@@ -113,7 +111,7 @@ class Block:
         self.translating_at_edge()
         self.translating_at_edge()
 
-    def translating_at_edge(self):
+    def translating_at_edge(self): #if the shape is being rotated by is at the edge it can't be rotated out of the screen so instead it is moved.
         move_to_side = 0
         for i in range(0,4):
             if currentRect[i].x < 0:
@@ -123,7 +121,6 @@ class Block:
 
 
         for j in range(0,4):
-            print('moving')
             currentBlock.shape.currentSquares[i].move(1, move_to_side, j)
             currentBlock.shape.currentSquares[i].updating(j)
 
@@ -242,7 +239,7 @@ class BlueLine:
     def __init__(self):
         self.currentSquares = [0,1,2,3]
         self.currentRect = [0,1,2,3]
-        self.colour = (0,0,205)
+        self.colour = (0,255,255)
         self.x = 120
         self.y = 0
 
@@ -408,11 +405,6 @@ def playing():
     for i in range(0,4):
         currentBlock.shape.currentSquares[i].updating(i)
     screen.fill(0)
-    '''
-    screen.fill(white)
-    for rectangle in screenRect:
-        pygame.draw.rect(screen, 0, rectangle)
-    '''
     allShapes.drawAllShapes()
     currentBlock.drawing()
 
@@ -422,18 +414,19 @@ def playing():
             exit()
 
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RIGHT:
+
+            if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                 side = 1
                 sideKeyDown = True
 
-            elif event.key == pygame.K_LEFT:
+            elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
                 side = -1
                 sideKeyDown = True
 
-            elif event.key == pygame.K_DOWN:
+            elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
                 downwardsKey = True
 
-            elif event.key == pygame.K_UP:
+            elif event.key == pygame.K_UP or event.key == pygame.K_w:
                 rotate = currentBlock.rotate()
                 if rotate == 'collided':
                     currentBlock.rotateClockwise()
@@ -448,20 +441,22 @@ def playing():
 
 
         if event.type == pygame.KEYUP:
-            sideKeyDown = False
-            downwardsKey = False
+            if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                downwardsKey = False
+            elif event.key == pygame.K_RIGHT or event.key == pygame.K_LEFT or event.key == pygame.K_a or event.key == pygame.K_d:
+                sideKeyDown = False
 
     if sideKeyDown:
         if int(count%40) == 0:
             if currentBlock.shape.currentSquares[1].checkIfEdge() == False:
                 for i in range(0,4):
-                    currentBlock.shape.currentSquares[i].move(side, 1, i)
+                    currentBlock.shape.currentSquares[i].move(side, 1, i) #side is declared higher up whe the key is pressed so that whe the right key is pressed it moves right so the side is positive as then the x value should increase.
             for i in range(0,4):
                 currentBlock.shape.currentSquares[i].updating(i)
             allShapes.collision()
             if allShapes.collided:
                 for i in range(0,4):
-                    currentBlock.shape.currentSquares[i].move(side, -1, i)
+                    currentBlock.shape.currentSquares[i].move(side, -1, i) #the -1 is because it wants it to move in the oppposite dire3ctio to before. all the plusers and minuses somehow make sense.
             allShapes.collided = False
 
     if downwardsKey: #soft drop
@@ -494,7 +489,6 @@ def playing():
             allShapes.collided = True
 
     if allShapes.collided:
-        print('here')
         spaceDown = False
         allShapes.appending()
 
@@ -506,15 +500,15 @@ def playing():
             if lines_removed % 10 == 0: #the level increases every 10 lines.
                 level += 1
 
-        for i in currentRect:
-            print(i.y)
+        for i in currentRect: #checks if any of the squares are touching or over the red line. if yes then the payer loses and the game is ended.
             if i.y <= finishing_y:
                 playing = False
+
         currentRect = []
-        currentBlock = Block()
+        currentBlock = Block() #picks a new random block.
 
     writingText(score, (screenWidth-100)/2, 0, 100, 50, (255,255,255), 0, 50)
-    pygame.draw.line(screen, (255,0,0), (0,finishing_y), (screenWidth,50))
+    pygame.draw.line(screen, (255,0,0), (0,finishing_y), (screenWidth,50)) #red line at the top of the screen.
 
     count+=1
     clock.tick(1000)
@@ -528,7 +522,6 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()
-        print('yesss')
         writingText('You lost', (screenWidth-100)/2, (screenHeight-50)/2, 100, 50, (255,255,255), 0, 80)
         pygame.display.flip()
 
